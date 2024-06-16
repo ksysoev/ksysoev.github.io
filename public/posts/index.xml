@@ -2,33 +2,25 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Posts on Memory notes</title>
-    <link>http://localhost:1313/posts/</link>
+    <link>https://ksysoev.github.io/posts/</link>
     <description>Recent content in Posts on Memory notes</description>
     <generator>Hugo -- 0.127.0</generator>
     <language>en-us</language>
     <lastBuildDate>Sun, 16 Jun 2024 18:48:26 +0800</lastBuildDate>
-    <atom:link href="http://localhost:1313/posts/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://ksysoev.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Go CPU Profile</title>
-      <link>http://localhost:1313/posts/go-cpu-profile/</link>
+      <title>CPU Profiling in Go with pprof</title>
+      <link>https://ksysoev.github.io/posts/go-cpu-profile/</link>
       <pubDate>Sun, 16 Jun 2024 18:48:26 +0800</pubDate>
-      <guid>http://localhost:1313/posts/go-cpu-profile/</guid>
+      <guid>https://ksysoev.github.io/posts/go-cpu-profile/</guid>
       <description>Performance is a critical aspect of any application. Understanding how your program utilizes CPU resources can provide valuable insights into potential bottlenecks and areas for optimization. One of the most effective ways to visualize CPU usage is through a flame chart, a graphical representation of your program&amp;rsquo;s call stack over time.
 In the realm of Go, a statically typed, compiled language renowned for its simplicity and efficiency, we have robust built-in tools for performance analysis.</description>
     </item>
     <item>
-      <title>Rate Limit Algorithms</title>
-      <link>http://localhost:1313/posts/rate-limit-algorithms/</link>
-      <pubDate>Thu, 13 Jun 2024 23:29:07 +0800</pubDate>
-      <guid>http://localhost:1313/posts/rate-limit-algorithms/</guid>
-      <description>Fixed Window Algorithm This algorithm uses a fixed window size that resets after a certain period. For example, if the window size is 100 requests and the window duration is one hour, then after 100 requests in less than an hour, all subsequent requests will be limited until the hour is up.
-Sliding Window Algorithm This is an improvement over the fixed window algorithm. It uses a rolling time window to track the requests, which can prevent a burst of requests at the boundary of the window duration.</description>
-    </item>
-    <item>
       <title>Understanding and Utilizing Error Wrapping in Go</title>
-      <link>http://localhost:1313/posts/go-error-wrapping/</link>
+      <link>https://ksysoev.github.io/posts/go-error-wrapping/</link>
       <pubDate>Mon, 10 Jun 2024 20:31:28 +0800</pubDate>
-      <guid>http://localhost:1313/posts/go-error-wrapping/</guid>
+      <guid>https://ksysoev.github.io/posts/go-error-wrapping/</guid>
       <description>In Go, error handling is a crucial aspect of creating robust and reliable software. One common scenario is when you need to pass an error up the call stack, but also want to add additional context. This is where error wrapping comes into play.
 Wrapping Errors The fmt package in Go provides a function called Errorf that allows you to create formatted error messages. It also supports a special placeholder %w that can be used to wrap errors with additional context.</description>
     </item>

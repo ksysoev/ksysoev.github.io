@@ -2,23 +2,20 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://localhost:1313/posts/go-cpu-profile/</loc>
+    <loc>https://ksysoev.github.io/posts/go-cpu-profile/</loc>
     <lastmod>2024-06-16T18:48:26+08:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/</loc>
+    <loc>https://ksysoev.github.io/</loc>
     <lastmod>2024-06-16T18:48:26+08:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/</loc>
+    <loc>https://ksysoev.github.io/posts/</loc>
     <lastmod>2024-06-16T18:48:26+08:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/rate-limit-algorithms/</loc>
-    <lastmod>2024-06-13T23:29:07+08:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/posts/go-error-wrapping/</loc>
+    <loc>https://ksysoev.github.io/posts/go-error-wrapping/</loc>
     <lastmod>2024-06-10T20:31:28+08:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/categories/</loc>
+    <loc>https://ksysoev.github.io/categories/</loc>
   </url><url>
-    <loc>http://localhost:1313/tags/</loc>
+    <loc>https://ksysoev.github.io/tags/</loc>
   </url>
 </urlset>
