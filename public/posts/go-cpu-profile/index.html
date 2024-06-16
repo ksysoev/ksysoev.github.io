@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex, nofollow">
+<title>CPU Profiling in Go with pprof | Memory notes</title>
+<meta name="keywords" content="">
+<meta name="description" content="Performance is a critical aspect of any application. Understanding how your program utilizes CPU resources can provide valuable insights into potential bottlenecks and areas for optimization. One of the most effective ways to visualize CPU usage is through a flame chart, a graphical representation of your program&rsquo;s call stack over time.
+In the realm of Go, a statically typed, compiled language renowned for its simplicity and efficiency, we have robust built-in tools for performance analysis.">
+<meta name="author" content="">
+<link rel="canonical" href="http://localhost:1313/posts/go-cpu-profile/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.b609c58d5c11bb90b1a54e04005d74ad1ddf22165eb79f5533967e57df9c3b50.css" integrity="sha256-tgnFjVwRu5CxpU4EAF10rR3fIhZet59VM5Z&#43;V9&#43;cO1A=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/go-cpu-profile/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="Memory notes (Alt + H)">Memory notes</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      CPU Profiling in Go with pprof
+    </h1>
+    <div class="post-meta"><span title='2024-06-16 18:48:26 +0800 +08'>June 16, 2024</span>
+
+</div>
+  </header> 
+  <div class="post-content"><p>Performance is a critical aspect of any application. Understanding how your program utilizes CPU resources can provide valuable insights into potential bottlenecks and areas for optimization. One of the most effective ways to visualize CPU usage is through a flame chart, a graphical representation of your program&rsquo;s call stack over time.</p>
+<p>In the realm of Go, a statically typed, compiled language renowned for its simplicity and efficiency, we have robust built-in tools for performance analysis. One of these tools is the <code>pprof</code> package, which allows us to profile CPU usage among other things.</p>
+<p>In this article, we will explore how to generate a CPU profile for a Go service, analyze it using <code>pprof</code>, and visualize the data with a flame chart. By the end of this guide, you&rsquo;ll have a solid foundation for diagnosing performance issues and optimizing your Go applications.</p>
+<h2 id="prerequisites">Prerequisites<a hidden class="anchor" aria-hidden="true" href="#prerequisites">#</a></h2>
+<p>Before we dive into the process of generating and analyzing a CPU profile for a Go service, there are a few prerequisites you&rsquo;ll need:</p>
+<ol>
+<li>
+<p><strong>Go</strong>: You should have Go installed on your machine. If you haven&rsquo;t installed it yet, you can download it from the official Go website. This tutorial assumes you have a basic understanding of Go programming.</p>
+</li>
+<li>
+<p><strong>pprof</strong>: pprof is a tool for visualization and analysis of profiling data. It&rsquo;s part of the Go standard library, so if you have Go installed, you already have pprof.</p>
+</li>
+<li>
+<p><strong>Graphviz</strong>: pprof uses Graphviz to generate visualizations, so you&rsquo;ll need to have Graphviz installed. You can download it from the official Graphviz website.</p>
+</li>
+<li>
+<p><strong>Basic Understanding of Go Profiling</strong>: While we&rsquo;ll cover the basics of CPU profiling in Go, it&rsquo;s helpful if you have a basic understanding of the concept. If you&rsquo;re new to profiling, you might find the Go blog post on profiling helpful.</p>
+</li>
+</ol>
+<p>With these prerequisites in place, you&rsquo;re ready to start profiling your Go services.</p>
+<h2 id="enabling-cpu-profiling-in-a-go-service">Enabling CPU Profiling in a Go Service<a hidden class="anchor" aria-hidden="true" href="#enabling-cpu-profiling-in-a-go-service">#</a></h2>
+<p>To enable CPU profiling in a Go service, you need to import the <code>net/http/pprof</code> package. This package automatically registers an HTTP handler for profiling data at <code>/debug/pprof/</code>.</p>
+<p>Here&rsquo;s how you can do it:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#f92672">import</span> (
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;net/http&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">_</span> <span style="color:#e6db74">&#34;net/http/pprof&#34;</span> <span style="color:#75715e">// This line is important
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Your application code here
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Start the HTTP server
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">ListenAndServe</span>(<span style="color:#e6db74">&#34;:8080&#34;</span>, <span style="color:#66d9ef">nil</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>In the code above, we import the <code>net/http/pprof</code> package with an underscore (<code>_</code>). This is known as a blank import, and it&rsquo;s used when we want to import a package solely for its side effects, without using any of its exported identifiers. In this case, the side effect is that the <code>net/http/pprof</code> package automatically registers an HTTP handler at <code>/debug/pprof/</code>.</p>
+<p>Now, if you run your Go service and navigate to <code>http://localhost:8080/debug/pprof/</code> in your web browser, you&rsquo;ll see a page with several profiling options. One of these options is <code>profile</code>, which generates a CPU profile.</p>
+<p>In the next section, we&rsquo;ll discuss how to generate and download a CPU profile.</p>
+<h2 id="generating-the-cpu-profile">Generating the CPU Profile<a hidden class="anchor" aria-hidden="true" href="#generating-the-cpu-profile">#</a></h2>
+<p>Once you&rsquo;ve enabled CPU profiling in your Go service, generating a CPU profile is as simple as sending a GET request to the <code>/debug/pprof/profile</code> endpoint. This endpoint generates a CPU profile and writes it as a response.</p>
+<p>Here&rsquo;s how you can generate a CPU profile:</p>
+<ol>
+<li>Start your Go service: Run your Go service that has the <code>net/http/pprof</code> package imported.</li>
+<li>Send a GET request to the profiling endpoint: You can use a tool like <code>curl</code> to send a GET request to <code>http://localhost:8080/debug/pprof/profile</code>. Replace <code>localhost:8080</code> with the address of your Go service if it&rsquo;s different.</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>curl http://localhost:8080/debug/pprof/profile?seconds<span style="color:#f92672">=</span><span style="color:#ae81ff">30</span> &gt; cpu.pprof
+</span></span></code></pre></div><p>In the command above, we&rsquo;re using the <code>seconds</code> query parameter to specify how long the profiling should last. In this case, we&rsquo;re profiling for 30 seconds. The output is written to a file named <code>cpu.pprof</code>.</p>
+<p>Now you have a CPU profile for your Go service! In the next section, we&rsquo;ll discuss how to analyze this profile using <code>go tool pprof</code>.</p>
+<h2 id="analyzing-the-cpu-profile-with-pprof-web-ui">Analyzing the CPU Profile with pprof Web UI<a hidden class="anchor" aria-hidden="true" href="#analyzing-the-cpu-profile-with-pprof-web-ui">#</a></h2>
+<p>Once you&rsquo;ve generated the CPU profile, you can analyze it using the <code>pprof</code> web interface. This tool reads the profile data and provides an interactive web-based interface to explore the data and generate visualizations.</p>
+<p>Start the pprof web interface: Run the following command in your terminal to start the pprof web interface:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>go tool pprof -http<span style="color:#f92672">=</span>:8080 cpu.pprof
+</span></span></code></pre></div><p>This command starts a web server at <code>localhost:8080</code> and opens the pprof web interface in your default web browser.</p>
+<p><img loading="lazy" src="/images/pprof.png" alt="pprof Web UI"  />
+</p>
+<p>The pprof web interface provides several views of the profile data:</p>
+<ul>
+<li><strong>Top</strong>: This view lists the functions that consume the most CPU time. The list is sorted by the amount of CPU time consumed, with the function that consumes the most time at the top.</li>
+<li><strong>Graph</strong>: This view shows a directed graph where nodes represent functions and edges represent function calls. The size and color of the nodes indicate the amount of CPU time consumed by the function.</li>
+<li><strong>Flame Graph</strong>: This view shows a flame graph of the CPU usage. Each bar represents a function, and the width of the bar represents the amount of CPU time consumed by the function. The y-axis shows the stack depth, with the currently executing function at the top.</li>
+<li><strong>Peek</strong>: This view shows the CPU consumption statistics for each line of code in the selected function.</li>
+<li><strong>Source</strong>: This view shows the source code of the selected function, with lines highlighted based on the amount of CPU time consumed.</li>
+</ul>
+<p>By exploring these views, you can gain insights into which functions consume the most CPU time, how functions call each other, and which lines of code are the most CPU-intensive. This information can help you optimize your Go service for better performance.</p>
+<h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<p>Profiling is an essential aspect of performance optimization in any software development process. In Go, the built-in <code>pprof</code> tool provides a robust and convenient way to generate and analyze CPU profiles.</p>
+<p>Throughout this article, we&rsquo;ve walked through the steps of generating a CPU profile, starting from running your Go program with the <code>pprof</code> package, to saving the profile to a file. We&rsquo;ve also explored how to analyze this profile using the <code>pprof</code> command-line interface and its web interface, which provides several insightful views of the profile data.</p>
+<p>Regular performance analysis using tools like <code>pprof</code> can lead to significant improvements in your Go applications. It allows you to identify CPU-intensive functions and lines of code, enabling targeted optimization efforts.</p>
+<p>It&rsquo;s important to note that CPU profiling works by sampling the call stack at regular intervals. This means it provides an approximation of where CPU time is spent. However, with a high enough sampling rate, this approximation can be very accurate and extremely useful in identifying performance bottlenecks.</p>
+<p>In conclusion, understanding and utilizing CPU profiling is a powerful skill in a Go developer&rsquo;s toolkit. It&rsquo;s a process that can help you write more efficient, performant Go code and build applications that scale effectively.</p>
+<p>Happy profiling!</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2024 <a href="http://localhost:1313/">Memory notes</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>
