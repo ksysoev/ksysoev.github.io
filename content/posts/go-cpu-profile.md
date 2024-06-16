@@ -18,9 +18,7 @@ Before we dive into the process of generating and analyzing a CPU profile for a 
 
 2. **pprof**: pprof is a tool for visualization and analysis of profiling data. It's part of the Go standard library, so if you have Go installed, you already have pprof.
 
-3. **Graphviz**: pprof uses Graphviz to generate visualizations, so you'll need to have Graphviz installed. You can download it from the official Graphviz website.
-
-4. **Basic Understanding of Go Profiling**: While we'll cover the basics of CPU profiling in Go, it's helpful if you have a basic understanding of the concept. If you're new to profiling, you might find the Go blog post on profiling helpful.
+3. **Basic Understanding of Go Profiling**: While we'll cover the basics of CPU profiling in Go, it's helpful if you have a basic understanding of the concept. If you're new to profiling, you might find the Go blog post on profiling helpful.
 
 With these prerequisites in place, you're ready to start profiling your Go services.
 
@@ -37,8 +35,6 @@ import (
 )
 
 func main() {
-    // Your application code here
-
     // Start the HTTP server
     http.ListenAndServe(":8080", nil)
 }
