@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="index, follow">
 <title>Understanding and Utilizing Error Wrapping in Go | Memory notes</title>
-<meta name="keywords" content="">
+<meta name="keywords" content="GoLang">
 <meta name="description" content="In Go, error handling is a crucial aspect of creating robust and reliable software. One common scenario is when you need to pass an error up the call stack, but also want to add additional context. This is where error wrapping comes into play.
 Wrapping Errors The fmt package in Go provides a function called Errorf that allows you to create formatted error messages. It also supports a special placeholder %w that can be used to wrap errors with additional context.">
 <meta name="author" content="">
@@ -101,7 +101,7 @@ Wrapping Errors The fmt package in Go provides a function called Errorf that all
   "name": "Understanding and Utilizing Error Wrapping in Go",
   "description": "In Go, error handling is a crucial aspect of creating robust and reliable software. One common scenario is when you need to pass an error up the call stack, but also want to add additional context. This is where error wrapping comes into play.\nWrapping Errors The fmt package in Go provides a function called Errorf that allows you to create formatted error messages. It also supports a special placeholder %w that can be used to wrap errors with additional context.",
   "keywords": [
-    
+    "GoLang"
   ],
   "articleBody": "In Go, error handling is a crucial aspect of creating robust and reliable software. One common scenario is when you need to pass an error up the call stack, but also want to add additional context. This is where error wrapping comes into play.\nWrapping Errors The fmt package in Go provides a function called Errorf that allows you to create formatted error messages. It also supports a special placeholder %w that can be used to wrap errors with additional context.\nHere’s an example of how you can use Errorf to wrap an error:\nfmt.Errorf(\"Failed to create order for user %s: %w\", username, err) In this example, if an error occurs when creating an order for a user, the error is wrapped with a message that includes the username.\nChecking Wrapped Errors Once an error is wrapped, you might want to check if the wrapped error contains a specific error. The errors package in Go provides a function called Is that can be used for this purpose.\nHere’s an example of how you can use Is to check if a wrapped error contains io.EOF:\nif errors.Is(err, io.EOF) { fmt.Println(\"End of file reached\") } Unwrapping Errors for More Information Sometimes, a wrapped error might carry useful information that you want to access. The errors package provides a function called As that can be used to “unwrap” a specific type of error.\nHere’s an example of how you can use As to unwrap a pgconn.PgError:\nvar pgErr *pgconn.PgError if errors.As(err, \u0026pgErr) { fmt.Println(\"Received PostgreSQL error with code: \", pgErr.Code) } In this example, if the error is a pgconn.PgError, it’s unwrapped and its code is printed.\n",
   "wordCount" : "274",
@@ -206,6 +206,7 @@ Wrapping Errors The fmt package in Go provides a function called Errorf that all
 
   <footer class="post-footer">
     <ul class="post-tags">
+      <li><a href="https://ksysoev.github.io/tags/golang/">GoLang</a></li>
     </ul>
   </footer>
 </article>

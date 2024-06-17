@@ -2,6 +2,7 @@
 title = 'CPU Profiling in Go with pprof'
 date = 2024-06-16T18:48:26+08:00
 draft = false
+tags = ['GoLang', 'Profiling']
 +++
 
 Performance is a critical aspect of any application. Understanding how your program utilizes CPU resources can provide valuable insights into potential bottlenecks and areas for optimization. One of the most effective ways to visualize CPU usage is through a flame chart, a graphical representation of your program's call stack over time.

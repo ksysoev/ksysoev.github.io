@@ -2,3 +2,5 @@ baseURL = 'https://ksysoev.github.io'
 languageCode = 'en-us'
 title = 'Memory notes'
 theme = 'papermod'
+[taxonomies]
+    tag = 'tags'
