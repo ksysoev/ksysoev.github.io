@@ -1,6 +1,94 @@
 baseURL = 'https://ksysoev.github.io'
 languageCode = 'en-us'
 title = 'Memory notes'
+copyright = "©2024 [Kirill Sysoev](https://github.com/ksysoev)"
 theme = 'papermod'
+mainsections = [ "posts" ]
+enableRobotsTXT = true
+buildDrafts = false
+
 [taxonomies]
     tag = 'tags'
+
+[outputs]
+home = [ "HTML", "RSS" ]
+
+[languages.en]
+languageName = "English"
+weight = 1
+
+  [languages.en.taxonomies]
+  category = "categories"
+  tag = "tags"
+
+[[languages.en.menu.main]]
+name = "Posts"
+url = "posts"
+weight = 5
+
+
+[[languages.en.menu.main]]
+name = "Tags"
+url = "tags/"
+weight = 10
+
+[params]
+env = "production"
+description = "Memory notes"
+author = "Kirill Sysoev"
+defaultTheme = "auto"
+ShowShareButtons = false
+ShowReadingTime = true
+displayFullLangName = true
+ShowPostNavLinks = false
+ShowBreadCrumbs = false
+ShowCodeCopyButtons = true
+ShowRssButtonInSectionTermList = true
+ShowAllPagesInArchive = true
+ShowPageNums = false
+ShowToc = false
+
+  [params.profileMode]
+  enabled = false
+  title = "PaperMod"
+
+    [[params.profileMode.buttons]]
+    name = "Archives"
+    url = "archives"
+
+    [[params.profileMode.buttons]]
+    name = "Tags"
+    url = "tags"
+
+  [params.homeInfoParams]
+  Title = "Welcome to Memory Notes!"
+  Content = """
+This cozy corner of the internet is my personal treasure chest of knowledge, 
+packed with handy info, code snippets, and quick notes I've gathered along my journey. 
+It's all about building a go-to stash of insights for those "aha!" moments. 
+If you find a gem in here that brightens your day or solves a puzzle, that's a win in my book!
+"""
+
+  [[params.socialIcons]]
+  name = "github"
+  title = "Follow on Github"
+  url = "https://github.com/ksysoev/"
+
+  [[params.socialIcons]]
+  name = "LinkedIn"
+  title = "Follow on LinkedIn"
+  url = "https://www.linkedin.com/in/kirill-sysoev/"
+
+  [[params.socialIcons]]
+  name = "rss"
+  title = "Subscribe"
+  url = "posts/index.xml"
+
+
+  [params.editPost]
+  URL = "https://github.com/ksysoev/ksysoev.github.io/issues"
+  Text = "Suggest Changes"
+  appendFilePath = false
+
+  [params.assets]
+  disableHLJS = true
