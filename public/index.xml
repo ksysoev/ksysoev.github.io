@@ -7,8 +7,15 @@
     <generator>Hugo -- 0.127.0</generator>
     <language>en</language>
     <copyright>©2024 Kirill Sysoev</copyright>
-    <lastBuildDate>Sun, 16 Jun 2024 18:48:26 +0800</lastBuildDate>
+    <lastBuildDate>Sun, 23 Jun 2024 11:14:49 +0800</lastBuildDate>
     <atom:link href="https://ksysoev.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Go Custom Profilers</title>
+      <link>https://ksysoev.github.io/posts/go-custom-profilers/</link>
+      <pubDate>Sun, 23 Jun 2024 11:14:49 +0800</pubDate>
+      <guid>https://ksysoev.github.io/posts/go-custom-profilers/</guid>
+      <description>In the ever-evolving landscape of software development, the need for precise and tailored performance analysis has never been more critical. Go, with its robust performance and concurrency model, offers developers a powerful platform for building efficient applications. However, even with Go&amp;rsquo;s built-in profiling tools, there are scenarios where a more customized approach is necessary to truly understand and optimize your application&amp;rsquo;s performance. This article dives into the world of custom profilers in Go, showcasing how to extend beyond the standard profiling tools to capture and analyze the specific metrics that matter most to your application.</description>
+    </item>
     <item>
       <title>CPU Profiling in Go with pprof</title>
       <link>https://ksysoev.github.io/posts/go-cpu-profile/</link>

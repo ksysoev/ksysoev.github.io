@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en"
+    dir="auto">
+
+    <head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Go Custom Profilers | Memory notes</title>
+<meta name="keywords" content="">
+<meta name="description" content="In the ever-evolving landscape of software development, the need for precise and tailored performance analysis has never been more critical. Go, with its robust performance and concurrency model, offers developers a powerful platform for building efficient applications. However, even with Go&rsquo;s built-in profiling tools, there are scenarios where a more customized approach is necessary to truly understand and optimize your application&rsquo;s performance. This article dives into the world of custom profilers in Go, showcasing how to extend beyond the standard profiling tools to capture and analyze the specific metrics that matter most to your application.">
+<meta name="author" content="Kirill Sysoev">
+<link rel="canonical" href="https://ksysoev.github.io/posts/go-custom-profilers/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.b609c58d5c11bb90b1a54e04005d74ad1ddf22165eb79f5533967e57df9c3b50.css" integrity="sha256-tgnFjVwRu5CxpU4EAF10rR3fIhZet59VM5Z&#43;V9&#43;cO1A=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://ksysoev.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://ksysoev.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://ksysoev.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://ksysoev.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://ksysoev.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://ksysoev.github.io/posts/go-custom-profilers/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+  
+
+<meta property="og:title" content="Go Custom Profilers" />
+<meta property="og:description" content="In the ever-evolving landscape of software development, the need for precise and tailored performance analysis has never been more critical. Go, with its robust performance and concurrency model, offers developers a powerful platform for building efficient applications. However, even with Go&rsquo;s built-in profiling tools, there are scenarios where a more customized approach is necessary to truly understand and optimize your application&rsquo;s performance. This article dives into the world of custom profilers in Go, showcasing how to extend beyond the standard profiling tools to capture and analyze the specific metrics that matter most to your application." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://ksysoev.github.io/posts/go-custom-profilers/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-06-23T11:14:49+08:00" />
+<meta property="article:modified_time" content="2024-06-23T11:14:49+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Go Custom Profilers"/>
+<meta name="twitter:description" content="In the ever-evolving landscape of software development, the need for precise and tailored performance analysis has never been more critical. Go, with its robust performance and concurrency model, offers developers a powerful platform for building efficient applications. However, even with Go&rsquo;s built-in profiling tools, there are scenarios where a more customized approach is necessary to truly understand and optimize your application&rsquo;s performance. This article dives into the world of custom profilers in Go, showcasing how to extend beyond the standard profiling tools to capture and analyze the specific metrics that matter most to your application."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://ksysoev.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Go Custom Profilers",
+      "item": "https://ksysoev.github.io/posts/go-custom-profilers/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Go Custom Profilers",
+  "name": "Go Custom Profilers",
+  "description": "In the ever-evolving landscape of software development, the need for precise and tailored performance analysis has never been more critical. Go, with its robust performance and concurrency model, offers developers a powerful platform for building efficient applications. However, even with Go\u0026rsquo;s built-in profiling tools, there are scenarios where a more customized approach is necessary to truly understand and optimize your application\u0026rsquo;s performance. This article dives into the world of custom profilers in Go, showcasing how to extend beyond the standard profiling tools to capture and analyze the specific metrics that matter most to your application.",
+  "keywords": [
+    
+  ],
+  "articleBody": "In the ever-evolving landscape of software development, the need for precise and tailored performance analysis has never been more critical. Go, with its robust performance and concurrency model, offers developers a powerful platform for building efficient applications. However, even with Go’s built-in profiling tools, there are scenarios where a more customized approach is necessary to truly understand and optimize your application’s performance. This article dives into the world of custom profilers in Go, showcasing how to extend beyond the standard profiling tools to capture and analyze the specific metrics that matter most to your application. From setting up custom profiling hooks to integrating with Go’s runtime/pprof package, we’ll explore practical examples and techniques to unlock deeper insights into your Go applications.\nCreating custom profile Custom profiling in Go allows developers to track specific aspects of their application’s performance that are not covered by the default profiling tools. This section demonstrates how to implement a custom profiler to monitor resource usage, specifically tracking connections to identify potential leaks.\nStep 1: Define a Custom Profile First, we define a custom profile using Go’s runtime/pprof package. This profile will track connections in our application\npackage mypkg import ( \"runtime/pprof\" ) var connProf = pprof.NewProfile(\"connection_profiler\") The profile name must be unique throughout the application; NewProfile will panic if it detects a duplicate name. To access a profiler defined in another package, use the Lookup function as follows:\nconnProf := pprof.Lookup(\"connection_profiler\") Step 2: Instrumentation Next, we instrument the application to add and remove connections from our custom profile. This is done by hooking into the connection lifecycle events: when a connection is established and when it is closed.\nfunc onConnectHook(conn wasabi.Connection) { connProf.Add(conn, 1) } func onDisconnectHook(conn wasabi.Connection) { connProf.Remov(conn) } Step 3: Collecting and Downloading the Profile To collect data from our custom profiler, we expose it via an HTTP server, typically done using Go’s built-in net/http/pprof handler. This allows us to download the profile data for analysis.\ncurl http://localhost:8080/debug/pprof/connection_profiler \u003e conn.pprof Step 4: Analyzing the Profile Finally, we analyze the collected profile using Go’s pprof tool. This step helps us visualize and understand the connection usage and potential leaks in our application.\ngo tool pprof -http=:8081 conn.pprof By following these steps, developers can create custom profiles in Go to monitor specific resources or behaviors within their applications. This example focused on tracking connections, but the same approach can be applied to various resources or events, providing deep insights into application performance and helping identify and resolve potential issues.\n",
+  "wordCount" : "415",
+  "inLanguage": "en",
+  "datePublished": "2024-06-23T11:14:49+08:00",
+  "dateModified": "2024-06-23T11:14:49+08:00",
+  "author":{
+    "@type": "Person",
+    "name": "Kirill Sysoev"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://ksysoev.github.io/posts/go-custom-profilers/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Memory notes",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://ksysoev.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+    </head>
+
+    <body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://ksysoev.github.io/" accesskey="h" title="Memory notes (Alt + H)">Memory notes</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://ksysoev.github.io/posts" title="Posts">
+                    <span>Posts</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://ksysoev.github.io/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      Go Custom Profilers
+    </h1>
+    <div class="post-meta"><span title='2024-06-23 11:14:49 +0800 +08'>June 23, 2024</span>&nbsp;·&nbsp;2 min&nbsp;·&nbsp;Kirill Sysoev&nbsp;|&nbsp;<a href="https://github.com/ksysoev/ksysoev.github.io/issues" rel="noopener noreferrer" target="_blank">Suggest Changes</a>
+
+</div>
+  </header> 
+  <div class="post-content"><p>In the ever-evolving landscape of software development, the need for precise and tailored performance analysis has never been more critical. Go, with its robust performance and concurrency model, offers developers a powerful platform for building efficient applications. However, even with Go&rsquo;s built-in profiling tools, there are scenarios where a more customized approach is necessary to truly understand and optimize your application&rsquo;s performance. This article dives into the world of custom profilers in Go, showcasing how to extend beyond the standard profiling tools to capture and analyze the specific metrics that matter most to your application. From setting up custom profiling hooks to integrating with Go&rsquo;s <code>runtime/pprof</code> package, we&rsquo;ll explore practical examples and techniques to unlock deeper insights into your Go applications.</p>
+<h2 id="creating-custom-profile">Creating custom profile<a hidden class="anchor" aria-hidden="true" href="#creating-custom-profile">#</a></h2>
+<p>Custom profiling in Go allows developers to track specific aspects of their application&rsquo;s performance that are not covered by the default profiling tools. This section demonstrates how to implement a custom profiler to monitor resource usage, specifically tracking connections to identify potential leaks.</p>
+<h3 id="step-1-define-a-custom-profile">Step 1: Define a Custom Profile<a hidden class="anchor" aria-hidden="true" href="#step-1-define-a-custom-profile">#</a></h3>
+<p>First, we define a custom profile using Go&rsquo;s <code>runtime/pprof</code> package. This profile will track connections in our application</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#f92672">package</span> <span style="color:#a6e22e">mypkg</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> (
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;runtime/pprof&#34;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">connProf</span> = <span style="color:#a6e22e">pprof</span>.<span style="color:#a6e22e">NewProfile</span>(<span style="color:#e6db74">&#34;connection_profiler&#34;</span>)
+</span></span></code></pre></div><p>The profile name must be unique throughout the application; <code>NewProfile</code> will panic if it detects a duplicate name. To access a profiler defined in another package, use the <code>Lookup</code> function as follows:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#a6e22e">connProf</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">pprof</span>.<span style="color:#a6e22e">Lookup</span>(<span style="color:#e6db74">&#34;connection_profiler&#34;</span>)
+</span></span></code></pre></div><h3 id="step-2-instrumentation">Step 2: Instrumentation<a hidden class="anchor" aria-hidden="true" href="#step-2-instrumentation">#</a></h3>
+<p>Next, we instrument the application to add and remove connections from our custom profile. This is done by hooking into the connection lifecycle events: when a connection is established and when it is closed.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">onConnectHook</span>(<span style="color:#a6e22e">conn</span> <span style="color:#a6e22e">wasabi</span>.<span style="color:#a6e22e">Connection</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">connProf</span>.<span style="color:#a6e22e">Add</span>(<span style="color:#a6e22e">conn</span>, <span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">onDisconnectHook</span>(<span style="color:#a6e22e">conn</span> <span style="color:#a6e22e">wasabi</span>.<span style="color:#a6e22e">Connection</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">connProf</span>.<span style="color:#a6e22e">Remov</span>(<span style="color:#a6e22e">conn</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="step-3-collecting-and-downloading-the-profile">Step 3: Collecting and Downloading the Profile<a hidden class="anchor" aria-hidden="true" href="#step-3-collecting-and-downloading-the-profile">#</a></h3>
+<p>To collect data from our custom profiler, we expose it via an HTTP server, typically done using Go&rsquo;s built-in <code>net/http/pprof</code> handler. This allows us to download the profile data for analysis.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>curl http://localhost:8080/debug/pprof/connection_profiler &gt; conn.pprof
+</span></span></code></pre></div><h3 id="step-4-analyzing-the-profile">Step 4: Analyzing the Profile<a hidden class="anchor" aria-hidden="true" href="#step-4-analyzing-the-profile">#</a></h3>
+<p>Finally, we analyze the collected profile using Go&rsquo;s pprof tool. This step helps us visualize and understand the connection usage and potential leaks in our application.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>go tool pprof -http<span style="color:#f92672">=</span>:8081 conn.pprof
+</span></span></code></pre></div><p>By following these steps, developers can create custom profiles in Go to monitor specific resources or behaviors within their applications. This example focused on tracking connections, but the same approach can be applied to various resources or events, providing deep insights into application performance and helping identify and resolve potential issues.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+  </footer>
+</article>
+        </main>
+        
+<footer class="footer">
+        <span>©2024 <a href="https://github.com/ksysoev">Kirill Sysoev</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+<script async defer
+            src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
+        <noscript><img src="https://queue.simpleanalyticscdn.com/noscript.gif"
+                alt referrerpolicy="no-referrer-when-downgrade" /></noscript>
+    </body>
+
+</html>
