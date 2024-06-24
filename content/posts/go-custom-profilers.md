@@ -2,6 +2,7 @@
 title = 'Go Custom Profilers'
 date = 2024-06-23T11:14:49+08:00
 draft = false
+tags = ['GoLang', 'Profiling']
 +++
 
 In the ever-evolving landscape of software development, the need for precise and tailored performance analysis has never been more critical. Go, with its robust performance and concurrency model, offers developers a powerful platform for building efficient applications. However, even with Go's built-in profiling tools, there are scenarios where a more customized approach is necessary to truly understand and optimize your application's performance. This article dives into the world of custom profilers in Go, showcasing how to extend beyond the standard profiling tools to capture and analyze the specific metrics that matter most to your application. From setting up custom profiling hooks to integrating with Go's `runtime/pprof` package, we'll explore practical examples and techniques to unlock deeper insights into your Go applications.
