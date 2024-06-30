@@ -10,7 +10,7 @@ In distributed environments or systems where idempotent operations are essential
 
 By addressing these challenges, request deduplication plays a crucial role in building resilient, efficient, and cost-effective software systems. This article aims to explore the mechanisms and strategies for implementing request deduplication in Go, offering insights into how developers can leverage this practice to build better software.
 
-## Use cases
+## Practical Scenarios for Deduplication
 
 Function call deduplication in Go can be particularly useful in several scenarios, including but not limited to:
 
@@ -19,11 +19,13 @@ Function call deduplication in Go can be particularly useful in several scenario
 - **Data Fetching and Synchronization**: When multiple clients or components request the same data almost simultaneously (e.g., in a distributed system), deduplicating these requests can ensure that the data is fetched once and then distributed, improving efficiency and consistency.
 - **Microservices Architecture**: In a microservices setup, deduplicating requests to a particular service can reduce the load and prevent the cascading failure effect where multiple instances of the same request overwhelm the service.
 
-## Implement deduplication of request with channels
+## Implementing Request Deduplication with Channels
 
 The provided Go code snippet demonstrates a deduplication strategy for caching requests using goroutines and channels, inspired by the development of the [AnyCache library](https://github.com/ksysoev/anycache). The Cache struct method Cache initiates caching requests with a unique key and a generator function. Requests are sent to a handler via channels. The requestHandler method manages incoming requests, ensuring that for each unique key, the expensive generator function is executed only once, regardless of the number of concurrent requests. It achieves this by storing pending requests in a map and using goroutines to process each unique request asynchronously. Responses are then distributed to all requesters of the same key, effectively deduplicating the requests and optimizing resource usage.
 
 ```golang
+type RequestQueue []CacheReuest
+
 func (c Cache) Cache(key string, generator CacheGenerator) (string, error) {
 	response := make(chan CacheResponse)
 	req := CacheReuest{
@@ -38,10 +40,9 @@ func (c Cache) Cache(key string, generator CacheGenerator) (string, error) {
 	return resp.value, resp.err
 }
 
-
 // Handler that will be execuited 
 func (c Cache) requestHandler() {
-	requestStorage := map[string][]CacheReuest{}
+	requestStorage := map[string]RequestQueue{}
 
 	for {
 		select {
@@ -53,7 +54,7 @@ func (c Cache) requestHandler() {
 				continue
             }
 
-            requestStorage[req.key] = []CacheReuest{req}
+            requestStorage[req.key] = RequestQueue{req}
 
 			go c.processRequest(req)
         case resp := <-c.responses:
@@ -75,7 +76,7 @@ func (c Cache) requestHandler() {
 }   
 ```
 
-# Implementing with using  singleflight groups
+## Simplifying Deduplication with Singleflight
 
 Just recently I found more easy way to achive the same functionality with usage of `golang.org/x/sync/singleflight`. 
 This approach ensures that for a given key, the expensive operation encapsulated by the generator function is executed only once, regardless of the number of concurrent requests. The Cache struct integrates singleflight.Group to manage these requests. When the Cache method is called, it leverages DoChan of singleflight.Group to either initiate the generator function for a new request or attach to an existing request for the same key. The result is then returned to all callers, effectively reducing redundant processing and optimizing performance.
@@ -104,6 +105,6 @@ func (c Cache) Cache(key string, generator CacheGenerator) (string, error) {
 ```
 
 
-### Conclusions
+## Conclusions
 
 Deduplicating function calls in Go is a powerful technique for enhancing the efficiency and reliability of applications, especially in distributed systems where idempotency and resource optimization are paramount. This article explored two primary methods for achieving request deduplication: a custom implementation using goroutines and channels, and leveraging the singleflight package. While the custom approach offers flexibility and a deep understanding of Go's concurrency model, the singleflight package provides a simpler, more elegant solution with less boilerplate code. Both methods effectively prevent the execution of identical requests multiple times, thereby saving computational resources, reducing the risk of data inconsistency, and ensuring that applications remain responsive and scalable. As developers continue to build complex, distributed systems, incorporating request deduplication strategies will be crucial for creating resilient, efficient, and cost-effective software solutions.
