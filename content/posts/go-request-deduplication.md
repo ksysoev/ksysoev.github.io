@@ -40,7 +40,7 @@ func (c Cache) Cache(key string, generator CacheGenerator) (string, error) {
 	return resp.value, resp.err
 }
 
-// Handler that will be execuited 
+// requestHandler will be running in background goroutine.
 func (c Cache) requestHandler() {
 	requestStorage := map[string]RequestQueue{}
 
@@ -70,7 +70,7 @@ func (c Cache) requestHandler() {
 
 			delete(requestStorage, resp.key)
         case <-c.ctx.Done():
-           //Here some clean up logic
+           // Here should be clean up logic, skipping it for simplicity
         }
     }
 }   
