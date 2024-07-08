@@ -11,13 +11,15 @@ without futher a do lets gets started.
 
 # Creating first plugin
 
-I didn't know where to start and started to googling in hope to find some how to guide for writing `protoc` plugins, [this blog post](https://rotemtam.com/2021/03/22/creating-a-protoc-plugin-to-gen-go-code/) for creating simple "hello world" plugin really helped me started. Main points that i picked up from this article:
+I didn't know where to start and started to googling in hope to find some how to guide for writing `protoc` plugins, [this blog post](https://rotemtam.com/2021/03/22/creating-a-protoc-plugin-to-gen-go-code/) for creating simple "hello world" plugin really helped me started. 
+
+Main points that i picked up from this article:
 
 - what need to be installed on my machine to be able generate code from protobuf file:
   - [protoc](https://grpc.io/docs/protoc-installation/)
   - [prtoc-ge-go](https://grpc.io/docs/languages/go/quickstart/)
-- You need to name your executable in certain way to make it available for protoc utility. like following `protoc-gen-<name-of-your-plugin>`
-- and the most importang it's provided code example for plugin that I was able to start from:
+- You need to name your executable in certain way to make it available for protoc utility. like following `protoc-gen-grpc-redis`(replace `grpc-redis` with name of your plugin)
+- it's provided code example for plugin that I was able to start from:
 
 ```go
 package main
@@ -50,4 +52,11 @@ func generateFile(gen *protogen.Plugin, file *protogen.File) {
 	return g
 }
 ```
-  
+- and how to run my plugin for code generation:
+
+```sh
+ protoc --go_out=. --go_opt=paths=source_relative \
+    --grpc-redis_out=. --grpc-redis_opt=paths=source_relative \
+    example/example.proto
+```
+
