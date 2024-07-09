@@ -2,6 +2,7 @@
 title = 'How to Develop a Custom Plugin for protoc'
 date = 2024-07-08T20:55:42+08:00
 draft = false
+tags = ['GoLang', 'gRPC', 'protoc']
 +++
 
 This guide will walk you through the steps to create a plugin for `protoc`, the protocol buffer compiler. A plugin allows you to generate custom code based on your `.proto` files.
