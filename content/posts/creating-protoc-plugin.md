@@ -85,3 +85,11 @@ func generateFile(gen *protogen.Plugin, file *protogen.File) *protogen.Generated
     ...
 }
 ```
+
+## Working with dependecies
+
+If you need to add dependencies to generated file you can use method `QualifiedGoIdent`, here a code example:
+
+`ErrorfName := g.QualifiedGoIdent(protogen.GoIdent{GoName: "Errorf", GoImportPath: "fmt"})`
+
+it'll add fmt package to file imports and also return correct name of Errorf function, in this example `ErrorfName` will contain string `fmt.Errorf`.
