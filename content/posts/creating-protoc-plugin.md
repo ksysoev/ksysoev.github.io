@@ -9,7 +9,7 @@ I needed to generate in addition to gRPC service implementation, custom RPC prot
 
 without futher a do lets gets started.
 
-# Creating first plugin
+## Creating first plugin
 
 I didn't know where to start and started to googling in hope to find some how to guide for writing `protoc` plugins, [this blog post](https://rotemtam.com/2021/03/22/creating-a-protoc-plugin-to-gen-go-code/) for creating simple "hello world" plugin really helped me started. 
 
@@ -60,3 +60,28 @@ func generateFile(gen *protogen.Plugin, file *protogen.File) {
     example/example.proto
 ```
 
+
+## Getting information about services
+
+`protogen.File` provide access to declaration from proto file, with method `Services` we can get access to list of declared RPC services.
+
+Service object provides access to information about the service and all of its methods. 
+
+here code example how we can get some basic information:
+
+```golang
+func generateFile(gen *protogen.Plugin, file *protogen.File) *protogen.GeneratedFile {
+    ...
+
+    for _, service := range file.Services {
+        g.P("// ". service.GoName)
+
+        g.P("// Methods:")
+        for _, method := range service.Methods {
+            g.P("// ", method.GoName, "(", method.Input.GoIdent, ")", method.Output.GoIdent)
+        }
+    }
+
+    ...
+}
+```
