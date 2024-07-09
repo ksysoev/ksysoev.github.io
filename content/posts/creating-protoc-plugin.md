@@ -118,7 +118,7 @@ Build your plugin:
 go build -o protoc-gen-myplugin
 ```
 
-Now you need to copy your executable into one of `PATH` directories
+Now, you need to copy your executable into one of the directories listed in your `PATH` environment variable to make it available for the `protoc` utility.
 
 Test your plugin with `protoc`:
 
