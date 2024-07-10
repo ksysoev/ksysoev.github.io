@@ -73,7 +73,7 @@ func generateMessage(g *protogen.GeneratedFile, message *protogen.Message) {
     g.P("// ", message.GoIdent.GoName, " is a message.")
     g.P("type ", message.GoIdent.GoName, " struct {")
     for _, field := range message.Fields {
-        g.P(field.GoName, " ", field.GoType, " `protobuf:", field.Desc.JSONName(), "`")
+        g.P(field.GoName, " ", field.GoType, " `json:\"", field.Desc.JSONName(), "\"`")
     }
     g.P("}")
     g.P()
