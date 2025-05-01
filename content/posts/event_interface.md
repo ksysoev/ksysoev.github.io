@@ -112,6 +112,22 @@ This pattern is particularly elegant because:
 2. The client code receives properly typed data without manual type assertions
 3. Adding new event types doesn't require changing the interface, just implementing it for new types
 
+## Why Enums Over Type Assertions?
+
+You might wonder why we're using an enum approach (`EventType`) instead of Go's built-in type assertions. There are several compelling reasons:
+
+1. **Exhaustiveness Checking**: With enums, we can use linters like `exhaustive` to verify that our switch statements handle all possible cases. This provides compile-time safety against forgetting to handle a new event type. With type assertions (`switch e := event.(type)`), there's no automated way to ensure you've handled all possible implementations.
+
+2. **Explicit Contract**: The enum approach makes the set of possible event types explicit in your codebase. This creates clearer documentation and a more discoverable API compared to type assertions where supported types are only visible in implementation details.
+
+3. **Serialization Friendly**: Enums can be easily serialized to/from various formats. When events cross system boundaries (databases, message queues, APIs), having a numeric or string identifier is significantly more practical than depending on Go's type system, which doesn't exist outside your application.
+
+4. **More Flexible Type Hierarchies**: With enums, you can have multiple implementations of the same event type, or events that share payload structures but represent different business concepts. Type assertions limit you to a 1:1 mapping between Go types and event types.
+
+5. **Testing Simplicity**: Mock implementations are easier to create when you can simply implement the interface and return the expected enum value, rather than needing to create entirely new types for testing.
+
+This approach gives us the best of both worlds: compile-time safety through interface conformance and the ability to clearly define and verify the set of supported event types.
+
 ## Benefits of This Approach
 
 1. **Type Safety**: The `ParsePayload` method ensures type safety by returning an error if the wrong type is provided.
