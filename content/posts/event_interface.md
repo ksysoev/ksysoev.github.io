@@ -1,7 +1,7 @@
 +++
 title = 'Building a Type-Safe Event System in Go Without Union Types'
 date = 2025-05-01T18:01:08+08:00
-draft = true
+draft = false
 tags = ['GoLang', 'Generics', 'Interface Design', 'Event Systems']
 +++
 
