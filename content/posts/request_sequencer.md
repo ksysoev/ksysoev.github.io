@@ -80,7 +80,6 @@ func WithRequestSequencer() Middleware {
 	}
 }
 ```
-```
 
 ### How It Works
 
