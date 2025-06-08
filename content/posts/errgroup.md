@@ -9,7 +9,7 @@ In modern service architectures, applications often need to run multiple indepen
 
 Go's `errgroup` package, part of the extended standard library (`golang.org/x/sync/errgroup`), provides an elegant solution to this challenge. It offers a simple yet powerful abstraction for running multiple goroutines concurrently while handling errors gracefully and maintaining excellent backward compatibility guarantees. This article explores how to leverage errgroup to build robust, concurrent service architectures with minimal complexity.
 
-## The Traditional Approach and Its Pitfalls
+## Implementing with wait groups and error channels
 
 Before diving into errgroup, let's examine what manual concurrent service management typically looks like:
 
@@ -20,25 +20,15 @@ func RunServerManual(ctx context.Context, cfg *Config) error {
     ctx, cancel := context.WithCancel(ctx)
     
     var wg sync.WaitGroup
-    errChan := make(chan error, 3)
-    
-    // Start reverse proxy
-    wg.Add(1)
-    go func() {
-        defer wg.Done()
-        defer cancel()
-        if err := revServ.Run(ctx); err != nil {
-            errChan <- fmt.Errorf("reverse proxy failed: %w", err)
-        }
-    }()
+    errChan := make(chan error, 2)
     
     // Start HTTP server
     wg.Add(1)
     go func() {
         defer wg.Done()
         defer cancel()
-        if err := httpServ.Run(ctx); err != nil {
-            errChan <- fmt.Errorf("http server failed: %w", err)
+        if err :=jobQueue.Run(ctx); err != nil {
+            errChan <- fmt.Errorf("job queue server failed: %w", err)
         }
     }()
     
@@ -66,7 +56,7 @@ func RunServerManual(ctx context.Context, cfg *Config) error {
 }
 ```
 
-## Enter errgroup: Simplifying Concurrent Operations
+## Using errgroup for cleaner concurrency management
 
 The `errgroup` package addresses these challenges by providing a clean abstraction that combines the functionality of `sync.WaitGroup` with automatic error handling and context cancellation. Here's how our service startup becomes dramatically simpler:
 
@@ -76,8 +66,7 @@ func RunServerManual(ctx context.Context, cfg *Config) error {
 
 	eg, ctx := errgroup.WithContext(ctx)
 
-	eg.Go(func() error { return revServ.Run(ctx) })
-	eg.Go(func() error { return httpServ.Run(ctx) })
+	eg.Go(func() error { return jobQueue.Run(ctx) })
 	eg.Go(func() error { return apiServ.Run(ctx) })
 
 	return eg.Wait()
