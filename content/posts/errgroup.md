@@ -1,5 +1,5 @@
 +++
-title = 'Graceful Concurrent Service Management with Go\'s errgroup'
+title = 'Graceful Concurrent Service Management with Go errgroup'
 date = 2025-06-08T16:51:40+08:00
 draft = false
 tags = ['GoLang', 'concurrency', 'errgroup']
